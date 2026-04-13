@@ -30,6 +30,12 @@ export default function Header() {
           >
             Contact
           </a>
+          <a
+            href="/styleguide"
+            className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+          >
+            Styleguide
+          </a>
           <ThemeToggle />
         </nav>
       </div>
