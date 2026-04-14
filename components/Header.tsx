@@ -13,6 +13,12 @@ export default function Header() {
 
         <nav className="flex items-center gap-6">
           <a
+            href="/lists"
+            className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+          >
+            My Lists
+          </a>
+          <a
             href="#projects"
             className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           >

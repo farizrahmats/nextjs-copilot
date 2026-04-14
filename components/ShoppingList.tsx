@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useSaveShoppingList } from "@/hooks/useSaveShoppingList";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface ShoppingItem {
   id: number;
@@ -10,6 +12,17 @@ interface ShoppingItem {
 export default function ShoppingList() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const { save, status, errorMessage } = useSaveShoppingList();
+
+  const isSaving = status === "loading";
+  const isSaveSuccess = status === "success";
+  const isSaveError = status === "error";
+
+  function handleClearConfirmed() {
+    setItems([]);
+    setShowClearConfirm(false);
+  }
 
   function addItem() {
     const trimmed = inputValue.trim();
@@ -27,7 +40,18 @@ export default function ShoppingList() {
   }
 
   return (
-    <div className="card w-full max-w-md">
+    <>
+      <ConfirmDialog
+        open={showClearConfirm}
+        title="Clear all items?"
+        description="This will remove all items from your list. This action cannot be undone."
+        confirmLabel="Yes, clear all"
+        cancelLabel="Cancel"
+        onConfirm={handleClearConfirmed}
+        onCancel={() => setShowClearConfirm(false)}
+      />
+
+      <div className="card w-full max-w-md">
       <div className="card-header">
         <h2 className="text-lg font-semibold">Shopping List</h2>
       </div>
@@ -98,18 +122,110 @@ export default function ShoppingList() {
       </div>
 
       {items.length > 0 && (
-        <div className="card-footer flex items-center justify-between">
-          <span className="text-sm" style={{ color: "var(--foreground-muted)" }}>
-            {items.length} {items.length === 1 ? "item" : "items"}
-          </span>
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => setItems([])}
-          >
-            Clear all
-          </button>
+        <div className="card-footer flex flex-col gap-3">
+          {/* Success / Error feedback */}
+          {isSaveSuccess && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-2 rounded-(--radius) border border-[#bbf7d0] bg-[#f0fdf4] px-3 py-2 text-sm text-[#166534] dark:border-[#14532d] dark:bg-[#052e16] dark:text-[#86efac]"
+            >
+              {/* Checkmark icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="shrink-0"
+              >
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              List saved successfully!
+            </div>
+          )}
+
+          {isSaveError && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="flex items-center gap-2 rounded-(--radius) border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-sm text-[#991b1b] dark:border-[#7f1d1d] dark:bg-[#2d0a0a] dark:text-[#fca5a5]"
+            >
+              {/* X circle icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="shrink-0"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M15 9l-6 6M9 9l6 6" />
+              </svg>
+              {errorMessage ?? "Failed to save. Please try again."}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm" style={{ color: "var(--foreground-muted)" }}>
+              {items.length} {items.length === 1 ? "item" : "items"}
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => setShowClearConfirm(true)}
+                aria-label="Clear all items"
+              >
+                Clear all
+              </button>
+
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => save("My Shopping List", items.map((i) => i.name))}
+                disabled={isSaving}
+                aria-label="Save shopping list"
+              >
+                {isSaving ? (
+                  <>
+                    {/* Spinner icon */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="animate-spin"
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    Saving…
+                  </>
+                ) : (
+                  "Save list"
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
+    </>
   );
 }

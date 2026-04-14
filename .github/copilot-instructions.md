@@ -221,3 +221,6 @@ The site may include:
 Each section should be modular and reusable where possible.
 
 ---
+
+## Features
+- when implementing features in `_features.md` file, check off the features as they are completed. This will help track progress and ensure all requirements are met.
